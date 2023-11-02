@@ -21,4 +21,4 @@ class HomeView(ListView):
 
 class ItemDetailView(DetailView):
     model = Item
-    template_name = 'item_list.html'
+    template_name = 'product.html'
