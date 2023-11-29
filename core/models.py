@@ -1,65 +1,57 @@
-from django.conf import settings
 from django.db import models
-from django.shortcuts import reverse
 
-CATEGORY_CHOICES = (
-    ('S', 'Shirt'),
-    ('SW', 'Sportwear'),
-    ('OW', 'Outwear'),
-)
 
-LABEL_CHOICES = (
-    ('P', 'primary'),
-    ('S', 'secondary'),
-)
+class ItemCategory(models.Model):
+    category_name = models.CharField(max_length=100)    # Category choices?
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.category_name
+
+
+def get_default_item_category():
+    return ItemCategory.objects.get_or_create(name="Other")[0]
 
 
 class Item(models.Model):
-    title = models.CharField(max_length=100)
-    price = models.FloatField()
-    discount_price = models.FloatField(blank=True, null=True)
-    category = models.CharField(choices=CATEGORY_CHOICES, max_length=10)
-    label = models.CharField(choices=LABEL_CHOICES, max_length=1)
-    slug = models.SlugField()
+    item_name = models.CharField(max_length=100)
     description = models.TextField()
+    price = models.FloatField()
+    image = models.ImageField(blank=True)
+    category_id = models.ForeignKey(ItemCategory,
+                                     related_name='item_category',
+                                     on_delete=models.SET(get_default_item_category))   # TODO: remove id from name
+    #owner_id = models.ForeignKey(...)
+    quantity = models.PositiveIntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.title
-
-    def get_absolute_url(self):
-        return reverse('core:product', kwargs={
-            'slug': self.slug
-        })
-
-    def get_add_to_cart_url(self):
-        return reverse('core:add-to-cart', kwargs={
-            'slug': self.slug
-        })
-
-    def get_remove_from_cart_url(self):
-        return reverse('core:remove-from-cart', kwargs={
-            'slug': self.slug
-        })
+        return self.item_name
 
 
 class OrderItem(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL,
-                             on_delete=models.CASCADE)
-    ordered = models.BooleanField(default=False)
+    # user = models.ForeignKey(settings.AUTH_USER_MODEL,
+    #                          on_delete=models.CASCADE)
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=1)
 
     def __str__(self):
-        return self.item.title
+        return self.item.item_name
 
 
 class Order(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL,
-                             on_delete=models.CASCADE)
-    ordered = models.BooleanField(default=False)
-    items = models.ManyToManyField(OrderItem)
-    start_date = models.DateTimeField(auto_now_add=True)
-    ordered_date = models.DateTimeField()
+    IN_PROGRESS = 'P'
+    DONE = 'D'
+    STATUS_CHOICES = [
+        (IN_PROGRESS, 'in_progress'),
+        (DONE, 'done'),
+    ]
 
-    def __str__(self):
-        return self.user.username
+
+    # user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    status = models.CharField(max_length=1,
+                              choices=STATUS_CHOICES,
+                              default=DONE)
+    # items = models.ManyToManyField(OrderItem)
+    created_at = models.DateTimeField(auto_now_add=True)
+    ordered_date = models.DateTimeField()
