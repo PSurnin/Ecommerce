@@ -19,7 +19,8 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('accounts/', include('allauth.urls')),
-    #path('api/auth/', include('authentication.urls')),
-    path('api/v1/', include('core.urls', namespace='core'))
+    path('api/v1/', include('core.urls', namespace='core')),
+    path('api-auth/', include('rest_framework.urls')),
+    path('api/v1/rest-auth/', include('dj_rest_auth.urls')),
+    path('api/v1/rest-auth/registration/', include('dj_rest_auth.registration.urls')),
 ]

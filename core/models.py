@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 
 
 class ItemCategory(models.Model):
@@ -18,10 +19,14 @@ class Item(models.Model):
     description = models.TextField()
     price = models.FloatField()
     image = models.ImageField(blank=True)
-    category_id = models.ForeignKey(ItemCategory,
-                                     related_name='item_category',
-                                     on_delete=models.SET(get_default_item_category))   # TODO: remove id from name
-    #owner_id = models.ForeignKey(...)
+    category = models.ForeignKey(
+        ItemCategory,
+        related_name='item_category',
+        on_delete=models.SET(get_default_item_category))
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+    )
     quantity = models.PositiveIntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -30,8 +35,10 @@ class Item(models.Model):
 
 
 class OrderItem(models.Model):
-    # user = models.ForeignKey(settings.AUTH_USER_MODEL,
-    #                          on_delete=models.CASCADE)
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+    )
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=1)
 
@@ -47,8 +54,10 @@ class Order(models.Model):
         (DONE, 'done'),
     ]
 
-
-    # user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+    )
     status = models.CharField(max_length=1,
                               choices=STATUS_CHOICES,
                               default=DONE)
