@@ -34,18 +34,6 @@ class Item(models.Model):
         return self.item_name
 
 
-class OrderItem(models.Model):
-    owner = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-    )
-    item = models.ForeignKey(Item, on_delete=models.CASCADE)
-    quantity = models.IntegerField(default=1)
-
-    def __str__(self):
-        return self.item.item_name
-
-
 class Order(models.Model):
     IN_PROGRESS = 'P'
     DONE = 'D'
@@ -61,6 +49,22 @@ class Order(models.Model):
     status = models.CharField(max_length=1,
                               choices=STATUS_CHOICES,
                               default=DONE)
-    # items = models.ManyToManyField(OrderItem)
     created_at = models.DateTimeField(auto_now_add=True)
     ordered_date = models.DateTimeField()
+
+    def __str__(self):
+        return f'{self.owner.username},  {self.status}'
+
+
+class OrderItem(models.Model):
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+    )
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    quantity = models.IntegerField(default=1)
+
+    def __str__(self):
+        return self.item.item_name
+
