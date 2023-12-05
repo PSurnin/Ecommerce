@@ -3,7 +3,7 @@ from django.conf import settings
 
 
 class ItemCategory(models.Model):
-    category_name = models.CharField(max_length=100)    # Category choices?
+    category_name = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import generics, permissions
 
 from .models import Item, OrderItem, Order, ItemCategory
@@ -49,6 +50,10 @@ class OrderItemList(generics.ListAPIView):
     permission_classes = [IsOwnerOrReadOnly, ]
     queryset = OrderItem.objects.all()
     serializer_class = OrderItemSerializer
+
+    # def perform_create(self, serializer):
+    #     category = get_object_or_404(ItemCategory, id=self.kwargs.get("category_id"))
+    #     serializer.save(category=category)
 
 
 class OrderItemDetail(generics.RetrieveUpdateDestroyAPIView):
