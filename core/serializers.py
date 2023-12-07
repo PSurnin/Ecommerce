@@ -17,7 +17,7 @@ class ItemSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         category = validated_data.pop("category")
-        instance, created = ItemCategory.objects.get_or_create(**category)
+        instance, _ = ItemCategory.objects.get_or_create(**category)
         item = Item.objects.create(**validated_data, category=instance)
 
         return item
@@ -34,10 +34,27 @@ class ItemSerializer(serializers.ModelSerializer):
         return super(ItemSerializer, self).update(instance, validated_data)
 
 
+class OrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = '__all__'
+
+
+# TODO: another serializer for item update view?
+# In case of update orderItem only changes amount of ordered, nothing else
 class OrderItemSerializer(serializers.ModelSerializer):
+    order = OrderSerializer()
+
     class Meta:
         model = OrderItem
-        fields = '__all__'
+        fields = ['id', 'order', 'item', 'quantity']
+
+    def create(self, validated_data):
+        order = validated_data.pop("order")
+        instance, _ = Order.objects.get_or_create(**order)
+        order_item = OrderItem.objects.create(**validated_data, order=instance)
+
+        return order_item
 
     # def validate(self, validated_data):
     #     order_quantity = validated_data["quantity"]
@@ -60,9 +77,3 @@ class OrderItemSerializer(serializers.ModelSerializer):
     #         raise PermissionDenied(error)
     #
     #     return validated_data
-
-
-class OrderSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Order
-        fields = '__all__'

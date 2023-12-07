@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, viewsets
 
 from .models import Item, OrderItem, Order, ItemCategory
 from .serializers import ItemSerializer, OrderSerializer, ItemCategorySerializer, OrderItemSerializer
@@ -7,29 +7,23 @@ from .permissions import IsOwnerOrReadOnly
 
 
 # ITEMS
-class ItemList(generics.ListCreateAPIView):
-    permission_classes = [IsOwnerOrReadOnly, ]
-    queryset = Item.objects.all()
-    serializer_class = ItemSerializer
-
-
-class ItemDetail(generics.RetrieveUpdateDestroyAPIView):
+class ItemViewSet(viewsets.ModelViewSet):
+    """
+    Perform actions with items for authenticated users, read by all
+    """
     permission_classes = [IsOwnerOrReadOnly, ]
     queryset = Item.objects.all()
     serializer_class = ItemSerializer
 
 
 # ITEM CATEGORY
-class ItemCategoryList(generics.ListAPIView):
-    permission_classes = [IsOwnerOrReadOnly, ]
+class ItemCategoryViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    List and Retrieve product categories
+    """
     queryset = ItemCategory.objects.all()
     serializer_class = ItemCategorySerializer
-
-
-class ItemCategoryDetail(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = [permissions.IsAdminUser, ]
-    queryset = ItemCategory.objects.all()
-    serializer_class = ItemCategorySerializer
+    permission_classes = (permissions.AllowAny,)
 
 
 # ORDERS
@@ -46,14 +40,10 @@ class OrderDetail(generics.RetrieveUpdateDestroyAPIView):
 
 
 # ORDER ITEMS
-class OrderItemList(generics.ListAPIView):
-    permission_classes = [IsOwnerOrReadOnly, ]
+class OrderItemList(generics.ListCreateAPIView):
+    permission_classes = [IsOwnerOrReadOnly, ]      # should be only for owner
     queryset = OrderItem.objects.all()
     serializer_class = OrderItemSerializer
-
-    # def perform_create(self, serializer):
-    #     category = get_object_or_404(ItemCategory, id=self.kwargs.get("category_id"))
-    #     serializer.save(category=category)
 
 
 class OrderItemDetail(generics.RetrieveUpdateDestroyAPIView):

@@ -53,7 +53,7 @@ class Order(models.Model):
     ordered_date = models.DateTimeField()
 
     def __str__(self):
-        return f'{self.owner.username},  {self.status}'
+        return f'Order #{self.id},  {self.status}'
 
 
 class OrderItem(models.Model):
