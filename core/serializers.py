@@ -9,6 +9,7 @@ class ItemCategorySerializer(serializers.ModelSerializer):
 
 
 class ItemSerializer(serializers.ModelSerializer):
+    owner = serializers.PrimaryKeyRelatedField(read_only=True,)
     category = ItemCategorySerializer()
 
     class Meta:
@@ -22,8 +23,6 @@ class ItemSerializer(serializers.ModelSerializer):
 
         return item
 
-    # TODO: check out more thorough
-    # TODO restrict ownership transfer?
     def update(self, instance, validated_data):
         if "category" in validated_data:
             nested_serializer = self.fields["category"]
@@ -56,24 +55,14 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
         return order_item
 
-    # def validate(self, validated_data):
-    #     order_quantity = validated_data["quantity"]
-    #     product_quantity = validated_data["product"].quantity
-    #
-    #     order_id = self.context["view"].kwargs.get("order_id")
-    #     product = validated_data["product"]
-    #     current_item = OrderItem.objects.filter(order__id=order_id, product=product)
-    #
-    #     if order_quantity > product_quantity:
-    #         error = {"quantity": _("Ordered quantity is more than the stock.")}
-    #         raise serializers.ValidationError(error)
-    #
-    #     if not self.instance and current_item.count() > 0:
-    #         error = {"product": _("Product already exists in your order.")}
-    #         raise serializers.ValidationError(error)
-    #
-    #     if self.context["request"].user == product.seller:
-    #         error = _("Adding your own product to your order is not allowed")
-    #         raise PermissionDenied(error)
-    #
-    #     return validated_data
+    def validate(self, validated_data):
+        order_quantity = validated_data['quantity']
+        product_quantity = validated_data['item'].quantity
+
+        if order_quantity > product_quantity:
+            error = {"quantity": "Ordered quantity is more than the stock."}
+            raise serializers.ValidationError(error)
+
+        return validated_data
+
+    # TODO: update for updated OrderItem amount

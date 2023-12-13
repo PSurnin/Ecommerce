@@ -73,3 +73,7 @@ Order:
 1. Get all OrderItems in Order
 2. Go to payment
 3. Remove Order
+
+
+OrderItem is created -> It checks for existing order_id? Creates new Order if not get_object
+When orderItem is validated -> checks for Item quantity -> does
