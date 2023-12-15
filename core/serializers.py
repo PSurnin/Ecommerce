@@ -33,27 +33,12 @@ class ItemSerializer(serializers.ModelSerializer):
         return super(ItemSerializer, self).update(instance, validated_data)
 
 
-class OrderSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Order
-        fields = '__all__'
-
-
-# TODO: another serializer for item update view?
-# In case of update orderItem only changes amount of ordered, nothing else
 class OrderItemSerializer(serializers.ModelSerializer):
-    order = OrderSerializer()
 
     class Meta:
         model = OrderItem
         fields = ['id', 'order', 'item', 'quantity']
-
-    def create(self, validated_data):
-        order = validated_data.pop("order")
-        instance, _ = Order.objects.get_or_create(**order)
-        order_item = OrderItem.objects.create(**validated_data, order=instance)
-
-        return order_item
+        read_only_fields = ("order",)
 
     def validate(self, validated_data):
         order_quantity = validated_data['quantity']
@@ -65,4 +50,33 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
         return validated_data
 
-    # TODO: update for updated OrderItem amount
+
+class OrderSerializer(serializers.ModelSerializer):
+
+    order_items = OrderItemSerializer(many=True)
+
+    class Meta:
+        model = Order
+        fields = '__all__'
+
+    def create(self, validated_data):
+        orders_data = validated_data.pop("order_items")
+        order = Order.objects.create(**validated_data)
+
+        for order_data in orders_data:
+            OrderItem.objects.create(order=order, **order_data)
+
+        return order
+
+    def update(self, instance, validated_data):
+        orders_data = validated_data.pop("order_items", None)
+        orders = list(instance.order_items.all())
+
+        if orders_data:
+            for order_data in orders_data:
+                order = orders.pop(0)
+                order.item = order_data.get("item", order.item)
+                order.quantity = order_data.get("quantity", order.quantity)
+                order.save()
+
+        return instance

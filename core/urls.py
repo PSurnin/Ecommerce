@@ -1,5 +1,5 @@
 from django.urls import path
-from rest_framework.routers import SimpleRouter
+from rest_framework.routers import DefaultRouter
 
 from .views import (
     ItemViewSet,
@@ -9,7 +9,7 @@ from .views import (
 
 app_name = 'core'
 
-router = SimpleRouter()
+router = DefaultRouter()
 router.register('items', ItemViewSet, basename='items')
 router.register('categories', ItemCategoryViewSet, basename='categories')
 router.register(r'^(?P<order_id>\d+)/order_items', OrderItemViewSet, basename='order_items')

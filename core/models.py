@@ -62,7 +62,7 @@ class OrderItem(models.Model):
         on_delete=models.CASCADE,
     )
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    order = models.ForeignKey(Order, related_name="order_items", on_delete=models.CASCADE)
     quantity = models.IntegerField(default=1)
 
     def __str__(self):
